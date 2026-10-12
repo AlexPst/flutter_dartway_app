@@ -23,3 +23,18 @@ dependencies:
 dev_dependencies:
   lints: ^6.0.0
   test: ^1.26.0
+
+# DartWay 0.21 is not on pub.dev yet: the template is ahead of the published
+# packages. Take them from the framework repository at the matching tag until
+# they are published, then delete this block.
+dependency_overrides:
+  dartway_core_shared:
+    git:
+      url: https://github.com/dartway/dartway.git
+      path: packages/dartway_core_shared
+      ref: stable-2026-10-11
+  dartway_analytics_shared:
+    git:
+      url: https://github.com/dartway/dartway.git
+      path: packages/dartway_analytics_shared
+      ref: stable-2026-10-11

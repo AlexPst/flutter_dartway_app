@@ -22,3 +22,43 @@ dev_dependencies:
   dartway_generator: ^0.21.0
   lints: ^6.0.0
   test: ^1.26.0
+
+# DartWay 0.21 is not on pub.dev yet: the template is ahead of the published
+# packages. Take them from the framework repository at the matching tag until
+# they are published, then delete this block.
+dependency_overrides:
+  dartway_core_server:
+    git:
+      url: https://github.com/dartway/dartway.git
+      path: packages/dartway_core_server
+      ref: stable-2026-10-11
+  dartway_analytics_server:
+    git:
+      url: https://github.com/dartway/dartway.git
+      path: packages/dartway_analytics_server
+      ref: stable-2026-10-11
+  dartway_generator:
+    git:
+      url: https://github.com/dartway/dartway.git
+      path: packages/dartway_generator
+      ref: stable-2026-10-11
+  dartway_client:
+    git:
+      url: https://github.com/dartway/dartway.git
+      path: packages/dartway_client
+      ref: stable-2026-10-11
+  dartway_core_shared:
+    git:
+      url: https://github.com/dartway/dartway.git
+      path: packages/dartway_core_shared
+      ref: stable-2026-10-11
+  dartway_orm:
+    git:
+      url: https://github.com/dartway/dartway.git
+      path: packages/dartway_orm
+      ref: stable-2026-10-11
+  dartway_analytics_shared:
+    git:
+      url: https://github.com/dartway/dartway.git
+      path: packages/dartway_analytics_shared
+      ref: stable-2026-10-11

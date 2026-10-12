@@ -97,3 +97,48 @@ flutter:
 
   assets:
     - assets/
+
+# DartWay 0.21 is not on pub.dev yet: the template is ahead of the published
+# packages. Take them from the framework repository at the matching tag until
+# they are published, then delete this block.
+dependency_overrides:
+  dartway_core_flutter:
+    git:
+      url: https://github.com/dartway/dartway.git
+      path: packages/dartway_core_flutter
+      ref: stable-2026-10-11
+  dartway_shared_preferences:
+    git:
+      url: https://github.com/dartway/dartway.git
+      path: packages/dartway_shared_preferences
+      ref: stable-2026-10-11
+  dartway_analytics_flutter:
+    git:
+      url: https://github.com/dartway/dartway.git
+      path: packages/dartway_analytics_flutter
+      ref: stable-2026-10-11
+  dartway_client:
+    git:
+      url: https://github.com/dartway/dartway.git
+      path: packages/dartway_client
+      ref: stable-2026-10-11
+  dartway_cli:
+    git:
+      url: https://github.com/dartway/dartway.git
+      path: packages/dartway_cli
+      ref: stable-2026-10-11
+  dartway_core_shared:
+    git:
+      url: https://github.com/dartway/dartway.git
+      path: packages/dartway_core_shared
+      ref: stable-2026-10-11
+  dartway_router:
+    git:
+      url: https://github.com/dartway/dartway.git
+      path: packages/dartway_router
+      ref: stable-2026-10-11
+  dartway_analytics_shared:
+    git:
+      url: https://github.com/dartway/dartway.git
+      path: packages/dartway_analytics_shared
+      ref: stable-2026-10-11
