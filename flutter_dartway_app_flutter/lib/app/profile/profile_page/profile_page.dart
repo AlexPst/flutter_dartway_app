@@ -1,0 +1,88 @@
+import 'package:flutter_dartway_app_flutter/app/profile/identity/profile_identity_section.dart';
+import 'package:flutter_dartway_app_flutter/app/profile/profile_page/widgets/avatar_picker.dart';
+import 'package:flutter_dartway_app_flutter/app/profile/profile_page/widgets/profile_settings_widget.dart';
+import 'package:flutter_dartway_app_flutter/core/app_l10n.dart';
+import 'package:flutter_dartway_app_flutter/core/dw_core.dart';
+import 'package:flutter_dartway_app_flutter/core/profile/my_profile.dart';
+import 'package:flutter_dartway_app_flutter/core/router/app_scaffold.dart';
+import 'package:flutter_dartway_app_flutter/core/router/router.dart';
+import 'package:flutter_dartway_app_flutter/ui_kit/ui_kit.dart';
+import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
+
+class ProfilePage extends StatelessWidget implements DwFeatureWidget {
+  const ProfilePage({super.key});
+
+  @override
+  DwFeatureSpec get dwFeature => const DwFeatureSpec(
+    id: 'profile_page/my-profile',
+    title: 'My profile',
+    purpose:
+        'A member manages their own account — photo, name, how they sign in '
+        '— and finds the way out of the app.',
+    behaviors: [
+      'Tapping the photo picks an image, which uploads straight to storage '
+          'and becomes the profile photo; it can be removed again.',
+      'Name and gender are saved only when changed.',
+      'The phone and the e-mail the member signs in with are added or changed '
+          'by a code sent to the new one (see profile/identity).',
+      'The way into the admin panel is shown to admins only.',
+      'Signing out returns to the sign-in screen.',
+    ],
+    requirements: [
+      'The admin button is convenience, not access: the route guard and the '
+          "server's access rules decide who actually gets in.",
+    ],
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final profile = context.profile;
+
+    return AppScaffold.main(
+      appBar: AppBar(title: AppText.title(l10n.profileTitle)),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AvatarPicker(avatarUrl: profile.avatarUrl),
+            const Gap(AppSpace.s16),
+            const ProfileSettingsWidget(),
+            const Gap(AppSpace.s8),
+            const ProfileIdentitySection(),
+            const Gap(AppSpace.s24),
+            if (profile.isAdmin) ...[
+              AppButton.secondary(
+                l10n.adminPanel,
+                onTap: dw.action(
+                  (context) =>
+                      GoRouter.of(context)
+                          .goNamed(AdminNavigationZone.admin.name),
+                ),
+              ),
+              const Gap(AppSpace.s16),
+            ],
+            AppButton.text(
+              l10n.signOutAction,
+              // The router takes it from here: signed out, the guards send
+              // every zone but auth to the sign-in screen.
+              onTap: dw.action((_) => dw.signOut()),
+            ),
+            // App stores require deleting the account inside the app. The
+            // server removes the account; the session ends with it, and the
+            // guards send the app to the sign-in screen.
+            AppButton.text(
+              l10n.deleteAccountAction,
+              onTap: dw.action(
+                (_) => dw.deleteAccount(),
+                confirmation: DwUiConfirmation(l10n.deleteAccountConfirmation),
+              ),
+            ),
+            const Gap(AppSpace.s24),
+          ],
+        ),
+      ),
+    );
+  }
+}

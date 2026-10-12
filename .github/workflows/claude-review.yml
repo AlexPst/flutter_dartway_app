@@ -1,0 +1,85 @@
+# Claude reviews every pull request and posts findings as inline comments.
+# Requires one repository secret: CLAUDE_CODE_OAUTH_TOKEN
+#   (GitHub → Settings → Secrets and variables → Actions → New repository secret).
+# Generate the token with `claude setup-token` (Claude Code CLI). Without it the
+# job fails; delete this file if you don't want automated PR review.
+name: Claude PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  id-token: write
+
+concurrency:
+  group: claude-review-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    if: ${{ github.event.pull_request.head.repo.fork != true }}
+    runs-on: ${{ fromJSON(vars.DW_CI_RUNS_ON || '"ubuntu-latest"') }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # This job must never be able to write code. Three locks, each
+      # sufficient on its own:
+      # - `github_token` is the workflow's own token, held to `contents: read`
+      #   above, so GitHub refuses any push. Without it the action exchanges
+      #   OIDC for the Claude App's installation token, which can write
+      #   contents whatever `permissions:` says.
+      # - No `track_progress`: it forces tag mode on pull request events, the
+      #   `@claude` responder whose default tools edit and commit. With an
+      #   explicit `prompt` and no tracking the action runs in agent mode.
+      # - `--disallowedTools` below takes the edit and commit tools away even
+      #   if a later action version grants them by default; `--allowedTools`
+      #   only adds to a toolset, it never narrows one.
+      # Comments still work: `pull-requests: write` and `issues: write` cover
+      # the summary and the inline remarks, posted as `github-actions[bot]`.
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Review the changes in this pull request (diff against the PR's base branch).
+
+            This project is built on DartWay (fullstack Dart: a Dart server and a Flutter
+            app): the contract — data objects, requests, commands, channels, refusal codes —
+            lives in `flutter_dartway_app_shared`, every request and command has one handler on
+            the server with an access rule, and the codecs, tables and registries are
+            generated (`dartway generate`) and never edited by hand. The conventions the
+            project holds itself to are in `.claude/CLAUDE.md`.
+
+            Do not comment on generated or platform files: `*.dw.dart`,
+            `**/generated/**`, `**/l10n/gen/**`, `*.g.dart`, `*.freezed.dart`, `*.mocks.dart`,
+            `*.pb.dart`;
+            iOS/Android project files (`*.pbxproj`, `*.xcconfig`, `*.xcscheme`, `*.plist`,
+            `*.entitlements`, `Podfile.lock`, `Runner.xcodeproj/**`); lockfiles and assets
+            (`pubspec.lock`, `*.lock`, `*.png`, `*.jpg`, `*.svg`, `*.webp`). Focus on
+            hand-written Dart.
+
+            Look for: bugs and logic errors, null-safety and typing problems, races and
+            unintended side effects, security issues. Report only findings you are
+            confident about.
+
+            Use mcp__github_inline_comment__create_inline_comment (with confirmed: true)
+            for line-level remarks. Use `gh pr comment` for the summary. Say so in the
+            summary comment if the change is clean. Publish only through GitHub comments —
+            do not emit the review as a chat message.
+          # No --model on purpose: the action picks one the account is entitled to.
+          # Pin one only after a live run proves it works — a hardcoded model id
+          # outlives the model it names.
+          claude_args: |
+            --max-turns 50
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
+            --disallowedTools "Edit,Write,MultiEdit,NotebookEdit,Bash(git commit:*),Bash(git push:*)"

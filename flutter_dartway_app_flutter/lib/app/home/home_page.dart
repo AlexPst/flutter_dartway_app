@@ -1,0 +1,87 @@
+import 'package:flutter_dartway_app_flutter/core/app_l10n.dart';
+import 'package:flutter_dartway_app_flutter/core/dev/test_error_button.dart';
+import 'package:flutter_dartway_app_flutter/core/dw_core.dart';
+import 'package:flutter_dartway_app_flutter/core/profile/my_profile.dart';
+import 'package:flutter_dartway_app_flutter/core/router/app_scaffold.dart';
+import 'package:flutter_dartway_app_flutter/ui_kit/ui_kit.dart';
+import 'package:flutter_dartway_app_shared/flutter_dartway_app_shared.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
+
+/// The first home screen — replace it once your domain has its own.
+///
+/// It is deliberately not a placeholder: the app name on it is a setting read
+/// from the server, live, so the very first screen proves the whole path —
+/// Postgres → handler → live request → widget. Change the name in the admin
+/// panel and every open copy of this screen follows without a reload.
+class HomePage extends StatelessWidget implements DwFeatureWidget {
+  const HomePage({super.key});
+
+  @override
+  DwFeatureSpec get dwFeature => const DwFeatureSpec(
+    id: 'home/live-settings',
+    title: 'Home',
+    purpose:
+        'The first screen proves the whole path works: Postgres → handler → '
+        'live request → widget.',
+    behaviors: [
+      'Greets the member by name.',
+      'The app name comes from the server settings, not from a constant, and '
+          'changing it in the admin panel updates this screen with no reload.',
+      'A failed read says so and offers a retry — the one thing this screen '
+          'exists to prove must not fail in silence.',
+    ],
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final settings = dw.request(const GetAppSettings());
+
+    return AppScaffold.main(
+      appBar: AppBar(
+        title: AppText.title(l10n.homeTitle),
+        actions: const [
+          ConnectionStatusIndicator(),
+          if (kDebugMode) TestErrorButton(),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText.title(l10n.helloUser(context.profile.firstName)),
+                  const Gap(AppSpace.s8),
+                  DwReadBuilder(
+                    settings,
+                    placeholder: const AppSettings(),
+                    builder: (context, stored) =>
+                        AppText.body(l10n.homeAppName(stored.appName)),
+                  ),
+                  const Gap(AppSpace.s8),
+                  AppText.caption(l10n.homeLiveHint),
+                ],
+              ),
+            ),
+            const Gap(AppSpace.s16),
+            AppCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText.body(l10n.homeNextStepTitle),
+                  const Gap(AppSpace.s8),
+                  AppText.caption(l10n.homeNextStepBody),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

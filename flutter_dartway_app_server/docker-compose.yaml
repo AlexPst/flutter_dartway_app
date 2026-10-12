@@ -1,0 +1,37 @@
+services:
+  # Development database. The `DW_DATABASE_*` values in ../deploy/config.yaml's
+  # `local` section point at it (127.0.0.1:8090, database "flutter_dartway_app",
+  # user "postgres").
+  #
+  # No test database here, on purpose: `dartway test` starts one for the run on
+  # a port Docker picks, and each test file creates and drops its own database
+  # on it.
+  postgres:
+    image: postgres:17-alpine
+    ports:
+      - '127.0.0.1:8090:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: flutter_dartway_app
+      POSTGRES_PASSWORD: 'dartway_dev_pw'
+    volumes:
+      - flutter_dartway_app_data:/var/lib/postgresql/data
+
+  # Object storage for uploads: the app uploads straight to it by a presigned
+  # URL the server issues, so a local RustFS is the same path production runs.
+  # The `DW_STORAGE_*` values in ../deploy/config.yaml's `local` section point at it.
+  storage:
+    image: rustfs/rustfs:1.0.0
+    command: ["/data"]
+    ports:
+      - '127.0.0.1:8100:9000' # S3 API — what the server and the app talk to
+      - '127.0.0.1:8101:9001' # web console, handy for looking at uploads
+    environment:
+      RUSTFS_ACCESS_KEY: dartway_dev
+      RUSTFS_SECRET_KEY: 'dartway_dev_storage_pw'
+    volumes:
+      - flutter_dartway_app_uploads:/data
+
+volumes:
+  flutter_dartway_app_data:
+  flutter_dartway_app_uploads:

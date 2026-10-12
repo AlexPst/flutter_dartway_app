@@ -1,0 +1,99 @@
+name: flutter_dartway_app_flutter
+description: The app, on DartWay.
+
+# The following line prevents the package from being accidentally published to
+# pub.dev using `pub publish`.
+publish_to: 'none'
+
+# `<semver>+<build>`, the app's own release. Which apps a server still serves is
+# decided by the shared package's version, the contract's; `lib/app_version.dart`
+# repeats this one, held equal by a test.
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.11.0 <4.0.0'
+  flutter: '>=3.44.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+
+  # The contract with the server: every request, command, data object, refusal
+  # code and the identifier rule the app speaks. A path dependency, so the web
+  # image copies this directory too.
+  flutter_dartway_app_shared:
+    path: ../flutter_dartway_app_shared
+
+  # The DartWay app skeleton: the client, its Riverpod bindings, uploads, the
+  # router and the shared contract, re-exported — one framework import.
+  dartway_core_flutter: ^0.21.0
+  # Where the signed-in session is kept: the core asks the plugins for whoever
+  # claimed the DwKeyValueStorePlugin role, and without one there is nowhere to
+  # put the session.
+  dartway_shared_preferences: ^0.7.0
+  # Analytics: the app's events, sent in batches to the server, and the calls
+  # the admin panel's dashboards change through (`dw.plugins.analytics`).
+  dartway_analytics_flutter: ^0.2.0
+
+  flutter_hooks: ^0.21.2
+  hooks_riverpod: ^3.0.0
+
+  # Picking a profile photo is the app's: the framework uploads bytes and
+  # carries no picker.
+  image_picker: ^1.2.0
+
+  # UI-kit dependencies: the kit lives in this app's `lib/ui_kit/`, so its
+  # packages belong to the app, not to the framework.
+  device_frame: ^1.4.0
+  flutter_svg: ^2.0.10+1
+  gap: ^3.0.1
+  pin_code_fields: ^8.0.1
+  collection: ^1.19.1
+
+dev_dependencies:
+  flutter_lints: '>=3.0.0 <7.0.0'
+  flutter_test:
+    sdk: flutter
+
+  # The splash generator (`dart run flutter_native_splash:create`): a build
+  # tool, not part of the app — the framework holds the splash at run time.
+  flutter_native_splash: ^2.4.0
+
+  # `DwFakeServer` and `DwFakeStorage`: widget tests talk to an in-memory
+  # server that speaks the real HTTP contract and live socket.
+  dartway_client: ^0.21.0
+
+  # The photo picker's platform seam: widget tests stand a fake picker in, as
+  # they stand a fake server.
+  image_picker_platform_interface: ^2.10.0
+  plugin_platform_interface: ^2.1.0
+
+  # `dart run dartway_cli:dartway <command>`: `dev web` serves the web app and
+  # the server on one origin locally, as the deployment does (no CORS);
+  # `check` grades this package against the conventions.
+  dartway_cli: ^0.24.0
+flutter_native_splash:
+  color: "#05060C"
+  image: assets/dartway_splash_logo.png
+
+  android: true
+  ios: true
+  # The web splash is written by hand in web/index.html: the generator would
+  # paint the document with the splash colour, which iOS keeps as the status
+  # bar colour for the whole session (#222).
+  web: false
+
+  android_12:
+    image: assets/dartway_splash_logo.png
+    icon_background_color: "#05060C"
+
+flutter:
+  generate: true # gen-l10n (see l10n.yaml); output is checked in under lib/l10n/gen
+
+  uses-material-design: true
+
+  assets:
+    - assets/

@@ -1,0 +1,12 @@
+{
+  "source": "https://github.com/dartway/dartway.git",
+  "channel": "stable",
+  "commit": "4fa31fd09b59a000d0acf4bd94d00adeb532a138",
+  "cliVersion": "0.11.1",
+  "installedAt": "2026-10-12T08:35:25.937964Z",
+  "settings": {
+    "baseBranch": "master",
+    "language": "English",
+    "notesTracker": "dartway/dartway"
+  }
+}
